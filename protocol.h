@@ -1,29 +1,26 @@
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
+
 #include <iostream>
 #include <string>
 #include <memory>
 
 #include "game_objects.h"
 
-#include "rapidjson/writer.h"
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
 
-enum MessageType
-{
-    kClientSubscribeRequestMessage,
-    kClientSubscribeResultMessage,
-    kViewerSubscribeRequestMessage,
-    kViewerSubscribeResultMessage,
-    kWorldStateMessage,
-    kTurnMessage,
-    kFinishMessage
-};
+static const std::string mClientSubscribeRequestType = "CLI_SUB_REQUEST";
+static const std::string mClientSubscribeResultType = "CLI_SUB_RESULT";
+static const std::string mViewerSubscribeRequestType = "VIEW_SUB_REQUEST";
+static const std::string mViewerSubscribeResultType = "VIEW_SUB_RESULT";
+static const std::string mWorldStateType = "STATE";
+static const std::string mTurnType = "TURN";
+static const std::string mFinishType = "FINISH";
+
 
 class Message
 {
 public:
-    MessageType type;
-    virtual std::string typeToString() const {}
+    std::string type;
     virtual ~Message() {}
 };
 
@@ -31,11 +28,7 @@ class ClientSubscribeRequestMessage : public Message
 {
 public:
     ClientSubscribeRequestMessage() {
-        type = kClientSubscribeRequestMessage;
-    }
-
-    virtual std::string typeToString() const {
-        return "CLI_SUB_REQUEST";
+        type = mClientSubscribeRequestType;
     }
 
     virtual ~ClientSubscribeRequestMessage() {}
@@ -48,11 +41,7 @@ public:
     size_t player_id;
 
     ClientSubscribeResultMessage() {
-        type = kClientSubscribeResultMessage;
-    }
-
-    virtual std::string typeToString() const {
-        return "CLI_SUB_RESULT";
+        type = mClientSubscribeResultType;
     }
 
     virtual ~ClientSubscribeResultMessage() {}
@@ -62,11 +51,7 @@ class ViewerSubscribeRequestMessage : public Message
 {
 public:
     ViewerSubscribeRequestMessage() {
-        type = kViewerSubscribeRequestMessage;
-    }
-
-    virtual std::string typeToString() const {
-        return "VIEW_SUB_REQUEST";
+        type = mViewerSubscribeRequestType;
     }
 
     virtual ~ViewerSubscribeRequestMessage() {}
@@ -79,11 +64,7 @@ public:
     size_t viewer_id;
 
     ViewerSubscribeResultMessage() {
-        type = kViewerSubscribeResultMessage;
-    }
-
-    virtual std::string typeToString() const {
-        return "VIEW_SUB_RESULT";
+        type = mViewerSubscribeResultType;
     }
 
     virtual ~ViewerSubscribeResultMessage() {}
@@ -95,11 +76,7 @@ public:
     World world;
 
     WorldStateMessage() {
-        type = kWorldStateMessage;
-    }
-
-    virtual std::string typeToString() const {
-        return "STATE";
+        type = mWorldStateType;
     }
 
     virtual ~WorldStateMessage() {}
@@ -111,11 +88,7 @@ public:
     Turn turn;
 
     TurnMessage() {
-        type = kTurnMessage;
-    }
-
-    virtual std::string typeToString() const {
-        return "TURN";
+        type = mTurnType;
     }
 
     virtual ~TurnMessage() {}
@@ -125,124 +98,10 @@ class FinishMessage : public Message
 {
 public:
     FinishMessage() {
-        type = kFinishMessage;
-    }
-
-    virtual std::string typeToString() const {
-        return "FINISH";
+        type = mFinishType;
     }
 
     virtual ~FinishMessage() {}
 };
 
-std::string BuildJsonMessage(const Message* const message);
-std::unique_ptr<Message> ParseJsonMessage(const std::string& json);
-
-// Made for testing
-std::string BuildClientSubscribeRequestMessage(const ClientSubscribeRequestMessage& message)
-{
-
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    writer.StartObject();
-    writer.String("type");
-    std::string type_to_string = message.typeToString();
-    writer.String(type_to_string.c_str(), type_to_string.size());
-    writer.EndObject();
-    return buffer.GetString();
-}
-
-
-std::string BuildClientSubscribeResultMessage(const ClientSubscribeResultMessage& message)
-{
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    writer.StartObject();
-    writer.String("type");
-    std::string type_to_string = message.typeToString();
-    writer.String(type_to_string.c_str(), type_to_string.size());
-    if (message.result) {
-        writer.String("result");
-        writer.String("ok");
-        writer.String("id");
-        writer.Uint(message.player_id);
-    } else {
-        writer.String("result");
-        writer.String("fail");
-    }
-    writer.EndObject();
-    return buffer.GetString();
-}
-
-// Made for testing
-std::string BuildViewerSubscribeRequestMessage(const ViewerSubscribeRequestMessage& message)
-{
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    writer.StartObject();
-    writer.String("type");
-    std::string type_to_string = message.typeToString();
-    writer.String(type_to_string.c_str(), type_to_string.size());
-    writer.EndObject();
-    return buffer.GetString();
-}
-
-std::string BuildViewerSubscribeResultMessage(const ViewerSubscribeResultMessage& message)
-{
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    writer.StartObject();
-    writer.String("type");
-    std::string type_to_string = message.typeToString();
-    writer.String(type_to_string.c_str(), type_to_string.size());
-    if (message.result) {
-        writer.String("result");
-        writer.String("ok");
-        writer.String("id");
-        writer.Uint(message.viewer_id);
-    } else {
-        writer.String("result");
-        writer.String("fail");
-    }
-    writer.EndObject();
-    return buffer.GetString();
-}
-
-// Made for testing
-std::string BuildWorldStateMessage(const WorldStateMessage& message)
-{
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    writer.StartObject();
-    writer.String("type");
-    std::string type_to_string = message.typeToString();
-    writer.String(type_to_string.c_str(), type_to_string.size());
-    message.world.Serialize(writer);
-    writer.EndObject();
-    return buffer.GetString();
-}
-
-std::string BuildTurnMessage(const TurnMessage& message)
-{
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    writer.StartObject();
-    writer.String("type");
-    std::string type_to_string = message.typeToString();
-    writer.String(type_to_string.c_str(), type_to_string.size());
-    message.turn.Serialize(writer);
-    writer.EndObject();
-    return buffer.GetString();
-}
-
-std::string BuildFinishMessage(const FinishMessage& message)
-{
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    writer.StartObject();
-    writer.String("type");
-    std::string type_to_string = message.typeToString();
-    writer.String(type_to_string.c_str(),type_to_string.size());
-    writer.EndObject();
-    return buffer.GetString();
-}
+#endif

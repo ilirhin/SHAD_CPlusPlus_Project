@@ -1,3 +1,6 @@
+#ifndef GAME_OBJECTS_H
+#define GAME_OBJECTS_H
+
 #include <iostream>
 #include <vector>
 
@@ -73,7 +76,7 @@ public:
     void Serialize(Writer& writer) const {
         writer.StartObject();
         writer.String("id");
-        writer.Double(id_);
+        writer.Uint(id_);
         position_.Serialize(writer);
         velocity_.Serialize(writer);
         writer.String("score");
@@ -166,3 +169,4 @@ public:
     }
 };
 
+#endif
