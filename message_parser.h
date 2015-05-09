@@ -7,14 +7,14 @@
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 
-std::unique_ptr<Message> ParseClientSubscribeRequestMessage(const rapidjson::Document& document)
+std::unique_ptr<Message> ParseGamerSubscribeRequestMessage(const rapidjson::Document& document)
 {
-    return std::unique_ptr<Message>(new ClientSubscribeRequestMessage());
+    return std::unique_ptr<Message>(new GamerSubscribeRequestMessage());
 }
 
-std::unique_ptr<Message> ParseClientSubscribeResultMessage(const rapidjson::Document& document)
+std::unique_ptr<Message> ParseGamerSubscribeResultMessage(const rapidjson::Document& document)
 {
-    ClientSubscribeResultMessage* message = new ClientSubscribeResultMessage();
+    GamerSubscribeResultMessage* message = new GamerSubscribeResultMessage();
     std::string result = document["result"].GetString();
     message->result = result == "ok";
     if (message->result) {
@@ -86,10 +86,10 @@ std::unique_ptr<Message> MessageFromJson(const std::string& json)
     rapidjson::Document document;
     document.Parse(json.c_str());
     std::string message_type = document["type"].GetString();
-    if (message_type == mClientSubscribeRequestType) {
-        return ParseClientSubscribeRequestMessage(document);
-    } else if (message_type == mClientSubscribeResultType) {
-        return ParseClientSubscribeResultMessage(document);
+    if (message_type == mGamerSubscribeRequestType) {
+        return ParseGamerSubscribeRequestMessage(document);
+    } else if (message_type == mGamerSubscribeResultType) {
+        return ParseGamerSubscribeResultMessage(document);
     } else if (message_type == mViewerSubscribeRequestType) {
         return ParseViewerSubscribeRequestMessage(document);
     } else if (message_type == mViewerSubscribeResultType) {

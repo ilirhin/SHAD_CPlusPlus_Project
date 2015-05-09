@@ -8,7 +8,7 @@
 #include "rapidjson/stringbuffer.h"
 
 // Made for testing
-std::string BuildClientSubscribeRequestMessage(const ClientSubscribeRequestMessage& message)
+std::string BuildGamerSubscribeRequestMessage(const GamerSubscribeRequestMessage& message)
 {
 
     rapidjson::StringBuffer buffer;
@@ -21,7 +21,7 @@ std::string BuildClientSubscribeRequestMessage(const ClientSubscribeRequestMessa
 }
 
 
-std::string BuildClientSubscribeResultMessage(const ClientSubscribeResultMessage& message)
+std::string BuildGamerSubscribeResultMessage(const GamerSubscribeResultMessage& message)
 {
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -111,14 +111,14 @@ std::string BuildFinishMessage(const FinishMessage& message)
 
 std::string MessageToJson(const Message * const message)
 {
-    if (message->type == mClientSubscribeRequestType) {
-        const ClientSubscribeRequestMessage * const client_subscribe_request_message
-                = dynamic_cast<const ClientSubscribeRequestMessage* const>(message);
-        return BuildClientSubscribeRequestMessage(*client_subscribe_request_message);
-    } else if (message->type == mClientSubscribeResultType) {
-        const ClientSubscribeResultMessage * const client_subscribe_result_message
-                = dynamic_cast<const ClientSubscribeResultMessage* const>(message);
-        return BuildClientSubscribeResultMessage(*client_subscribe_result_message);
+    if (message->type == mGamerSubscribeRequestType) {
+        const GamerSubscribeRequestMessage * const gamer_subscribe_request_message
+                = dynamic_cast<const GamerSubscribeRequestMessage* const>(message);
+        return BuildGamerSubscribeRequestMessage(*gamer_subscribe_request_message);
+    } else if (message->type == mGamerSubscribeResultType) {
+        const GamerSubscribeResultMessage * const gamer_subscribe_result_message
+                = dynamic_cast<const GamerSubscribeResultMessage* const>(message);
+        return BuildGamerSubscribeResultMessage(*gamer_subscribe_result_message);
     } else if (message->type == mViewerSubscribeRequestType) {
         const ViewerSubscribeRequestMessage * const viewer_subscribe_request_message
                 = dynamic_cast<const ViewerSubscribeRequestMessage* const>(message);

@@ -6,18 +6,18 @@
 
 int main() {
     std::unique_ptr<Message> message_ptr;
-    std::cout << BuildClientSubscribeRequestMessage(ClientSubscribeRequestMessage()) << std::endl;
-    message_ptr = MessageFromJson(BuildClientSubscribeRequestMessage(ClientSubscribeRequestMessage()));
+    std::cout << BuildGamerSubscribeRequestMessage(GamerSubscribeRequestMessage()) << std::endl;
+    message_ptr = MessageFromJson(BuildGamerSubscribeRequestMessage(GamerSubscribeRequestMessage()));
     std::cout << MessageToJson(message_ptr.release()) << std::endl;
-    ClientSubscribeResultMessage message1;
+    GamerSubscribeResultMessage message1;
     message1.result = false;
-    std::cout << BuildClientSubscribeResultMessage(message1) << std::endl;
-    message_ptr = MessageFromJson(BuildClientSubscribeResultMessage(message1));
+    std::cout << BuildGamerSubscribeResultMessage(message1) << std::endl;
+    message_ptr = MessageFromJson(BuildGamerSubscribeResultMessage(message1));
     std::cout << MessageToJson(message_ptr.release()) << std::endl;
     message1.result = true;
     message1.player_id = 1;
-    std::cout << BuildClientSubscribeResultMessage(message1) << std::endl;
-    message_ptr = MessageFromJson(BuildClientSubscribeResultMessage(message1));
+    std::cout << BuildGamerSubscribeResultMessage(message1) << std::endl;
+    message_ptr = MessageFromJson(BuildGamerSubscribeResultMessage(message1));
     std::cout << MessageToJson(message_ptr.release()) << std::endl;
 
 

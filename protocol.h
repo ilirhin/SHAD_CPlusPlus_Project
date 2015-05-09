@@ -8,8 +8,8 @@
 #include "game_objects.h"
 
 
-static const std::string mClientSubscribeRequestType = "CLI_SUB_REQUEST";
-static const std::string mClientSubscribeResultType = "CLI_SUB_RESULT";
+static const std::string mGamerSubscribeRequestType = "CLI_SUB_REQUEST";
+static const std::string mGamerSubscribeResultType = "CLI_SUB_RESULT";
 static const std::string mViewerSubscribeRequestType = "VIEW_SUB_REQUEST";
 static const std::string mViewerSubscribeResultType = "VIEW_SUB_RESULT";
 static const std::string mWorldStateType = "STATE";
@@ -24,27 +24,27 @@ public:
     virtual ~Message() {}
 };
 
-class ClientSubscribeRequestMessage : public Message
+class GamerSubscribeRequestMessage : public Message
 {
 public:
-    ClientSubscribeRequestMessage() {
-        type = mClientSubscribeRequestType;
+    GamerSubscribeRequestMessage() {
+        type = mGamerSubscribeRequestType;
     }
 
-    virtual ~ClientSubscribeRequestMessage() {}
+    virtual ~GamerSubscribeRequestMessage() {}
 };
 
-class ClientSubscribeResultMessage : public Message
+class GamerSubscribeResultMessage : public Message
 {
 public:
     bool result;
     size_t player_id;
 
-    ClientSubscribeResultMessage() {
-        type = mClientSubscribeResultType;
+    GamerSubscribeResultMessage() {
+        type = mGamerSubscribeResultType;
     }
 
-    virtual ~ClientSubscribeResultMessage() {}
+    virtual ~GamerSubscribeResultMessage() {}
 };
 
 class ViewerSubscribeRequestMessage : public Message
