@@ -20,13 +20,14 @@ enum ClientType { GAMER, VIEWER, UNDEFINED_TYPE };
 class Client
 {
 protected:
-    // ActionManager actionManager_;
+    ActionManager actionManager_;
     ClientType type_;
     size_t id_;
     int sock_;
-public:
 
-    Client(ClientType type) : type_(type)
+public:
+    Client(ClientType type, const ActionManager& actionManager) :
+            type_(type), actionManager_(actionManager)
     {
         sock_ = socket(AF_INET, SOCK_STREAM, 0);
         if (sock_ < 0) {
@@ -41,13 +42,31 @@ public:
         }
     }
 
+    virtual void run(size_t port);
+
+protected:
     virtual bool connectToServer(size_t port);
 
-    virtual bool finishConnection();
+    bool isFinishConnectionMessage(const std::string& finish_message_str) {
+        std::unique_ptr<Message> message = MessageFromJson(finish_message_str);
+        if (message->type != mFinishType) {
+            return false;
+        }
+        std::cout << "Finish connection" << std::endl;
+        return true;
+    }
 
-    // converting between output format and out inner format
-    // something else
-protected:
+    bool isWorldStateMessage(const std::string& world_state_message_str, World& world) {
+        std::unique_ptr<Message> message = MessageFromJson(world_state_message_str);
+        if (message->type != mWorldStateType) {
+            return false;
+        }
+        std::unique_ptr<WorldStateMessage> world_state_message
+                (dynamic_cast<WorldStateMessage*>(message.release()));
+        world = world_state_message->world;
+        return true;
+    }
+
     int sendString(const std::string& str) {
         int total_send = 0;
         while (true) {
@@ -77,8 +96,33 @@ protected:
 
 class Gamer : public Client {
 public:
-    Gamer(ClientType type) : Client(type) {}
+    Gamer(ClientType type, const ActionManager& actionManager) :
+            Client(type, actionManager) {}
 
+    void run(size_t port) {
+        if (!connectToServer(port)) {
+            return;
+        }
+        std::string message_str;
+        while (recvString(message_str) >= 0) {
+            World world_state;
+            if (isFinishConnectionMessage(message_str)) {
+                return;
+            } else if (isWorldStateMessage(message_str, world_state)) {
+                std::string turn_answer;
+                performTurn(world_state, turn_answer);
+                int send = sendString(turn_answer);
+                if (send < 0) {
+                    std::cout << "Error: can not send turn message to server" << std::endl;
+                    continue;
+                }
+            } else {
+                std::cout << "Error: incorrect message received" << std::endl;
+            }
+        }
+    }
+
+private:
     virtual bool connectToServer(size_t port) {
         // Connecting
         int connect;
@@ -122,12 +166,44 @@ public:
         std::cout << "Gamer connected to server with id = " << id_ << std::endl;
         return true;
     }
+
+    void performTurn(const World& world, std::string& turn_answer) const {
+        TurnMessage turn_message;
+        turn_message.turn.ball_id_ = id_;
+        turn_message.turn.world_id_ = world.world_id;
+        for (const Ball& ball : world.balls) {
+            if (ball.id_ == id_) {
+                turn_message.turn.acceleration_ = actionManager_.performGamerAction(world, ball);
+                break;
+            }
+        }
+        turn_answer = MessageToJson(&turn_message);
+    }
 };
 
 class Viewer : public Client {
 public:
-    Viewer(ClientType type) : Client(type) {}
+    Viewer(ClientType type, const ActionManager& actionManager) :
+            Client(type, actionManager) {}
 
+    void run(size_t port) {
+        if (!connectToServer(port)) {
+            return;
+        }
+        std::string message_str;
+        while (recvString(message_str) >= 0) {
+            World world_state;
+            if (isFinishConnectionMessage(message_str)) {
+                return;
+            } else if (isWorldStateMessage(message_str, world_state)) {
+                performView(world_state);
+            } else {
+                std::cout << "Error: incorrect message received" << std::endl;
+            }
+        }
+    }
+
+private:
     virtual bool connectToServer(size_t port) {
         // Connecting
         int connect;
@@ -170,5 +246,9 @@ public:
         id_ = subscribe_result_message->viewer_id;
         std::cout << "Viewer connected to server with id = " << id_ << std::endl;
         return true;
+    }
+
+    void performView(const World& world) {
+        actionManager_.performViewerAction(world);
     }
 };

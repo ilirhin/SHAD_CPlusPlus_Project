@@ -55,7 +55,7 @@ public:
 
 class MovementStrategy {
 public:
-    virtual Point getAcceleration(const World& world,
+    virtual Acceleration getAcceleration(const World& world,
                                   StrategyTaskPtr strategyTaskPtr, const Ball& ball);
 };
 
