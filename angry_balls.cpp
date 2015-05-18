@@ -3,8 +3,11 @@
 
 #include "message_builder.h"
 #include "message_parser.h"
+#include "strategy.h"
 
 int main() {
+    NearestCoinStrategy a(1);
+
     std::unique_ptr<Message> message_ptr;
     std::cout << BuildGamerSubscribeRequestMessage(GamerSubscribeRequestMessage()) << std::endl;
     message_ptr = MessageFromJson(BuildGamerSubscribeRequestMessage(GamerSubscribeRequestMessage()));

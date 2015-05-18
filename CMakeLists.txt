@@ -7,4 +7,4 @@ set(HEADER_FILES client.h)
 set(SOURCE_FILES angry_balls.cpp)
 
 
-add_executable(SHAD_CPlusPlus_Project ${SOURCE_FILES} ${HEADER_FILES})
+add_executable(SHAD_CPlusPlus_Project ${SOURCE_FILES} ${HEADER_FILES} utils.h)
