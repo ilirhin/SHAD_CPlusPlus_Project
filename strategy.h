@@ -84,9 +84,7 @@ public:
         return result;
     }
 
-    virtual std::deque<StrategyTaskPtr> estimateActions(const World& world, const Ball& ball) {
-        return std::deque<StrategyTaskPtr>();
-    }
+    virtual std::deque<StrategyTaskPtr> estimateActions(const World& world, const Ball& ball) = 0;
 };
 
 typedef std::function<double(const Ball&, const Coin&)> Estimator;
@@ -138,5 +136,6 @@ class MovementStrategy {
 public:
     virtual Acceleration getAcceleration(const World& world,
                                   StrategyTaskPtr strategyTaskPtr, const Ball& ball);
+    virtual ~MovementStrategy() {}
 };
 
