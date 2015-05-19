@@ -17,25 +17,14 @@ static const std::string mTurnType = "TURN";
 static const std::string mFinishType = "FINISH";
 
 
-class Message
-{
+class Message {
 public:
     std::string type;
-    virtual ~Message() {}
+
+    virtual ~Message() { }
 };
 
-class GamerSubscribeRequestMessage : public Message
-{
-public:
-    GamerSubscribeRequestMessage() {
-        type = mGamerSubscribeRequestType;
-    }
-
-    virtual ~GamerSubscribeRequestMessage() {}
-};
-
-class GamerSubscribeResultMessage : public Message
-{
+class GamerSubscribeResultMessage : public Message {
 public:
     bool result;
     size_t player_id;
@@ -44,21 +33,25 @@ public:
         type = mGamerSubscribeResultType;
     }
 
-    virtual ~GamerSubscribeResultMessage() {}
-};
-
-class ViewerSubscribeRequestMessage : public Message
-{
-public:
-    ViewerSubscribeRequestMessage() {
-        type = mViewerSubscribeRequestType;
+    size_t id() const {
+        return player_id;
     }
 
-    virtual ~ViewerSubscribeRequestMessage() {}
+    virtual ~GamerSubscribeResultMessage() { }
 };
 
-class ViewerSubscribeResultMessage : public Message
-{
+class GamerSubscribeRequestMessage : public Message {
+public:
+    typedef GamerSubscribeResultMessage ResultMessage;
+
+    GamerSubscribeRequestMessage() {
+        type = mGamerSubscribeRequestType;
+    }
+
+    virtual ~GamerSubscribeRequestMessage() { }
+};
+
+class ViewerSubscribeResultMessage : public Message {
 public:
     bool result;
     size_t viewer_id;
@@ -67,11 +60,25 @@ public:
         type = mViewerSubscribeResultType;
     }
 
-    virtual ~ViewerSubscribeResultMessage() {}
+    size_t id() const {
+        return viewer_id;
+    }
+
+    virtual ~ViewerSubscribeResultMessage() { }
 };
 
-class WorldStateMessage : public Message
-{
+class ViewerSubscribeRequestMessage : public Message {
+public:
+    typedef ViewerSubscribeResultMessage ResultMessage;
+
+    ViewerSubscribeRequestMessage() {
+        type = mViewerSubscribeRequestType;
+    }
+
+    virtual ~ViewerSubscribeRequestMessage() { }
+};
+
+class WorldStateMessage : public Message {
 public:
     World world;
 
@@ -79,11 +86,10 @@ public:
         type = mWorldStateType;
     }
 
-    virtual ~WorldStateMessage() {}
+    virtual ~WorldStateMessage() { }
 };
 
-class TurnMessage : public Message
-{
+class TurnMessage : public Message {
 public:
     Turn turn;
 
@@ -91,17 +97,16 @@ public:
         type = mTurnType;
     }
 
-    virtual ~TurnMessage() {}
+    virtual ~TurnMessage() { }
 };
 
-class FinishMessage : public Message
-{
+class FinishMessage : public Message {
 public:
     FinishMessage() {
         type = mFinishType;
     }
 
-    virtual ~FinishMessage() {}
+    virtual ~FinishMessage() { }
 };
 
 #endif
