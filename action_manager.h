@@ -1,4 +1,5 @@
 #include "strategy.h"
+#pragma once
 
 class ActionManager {
 private:

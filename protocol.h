@@ -33,6 +33,10 @@ public:
         type = mGamerSubscribeResultType;
     }
 
+    size_t id() const {
+        return player_id;
+    }
+
     virtual ~GamerSubscribeResultMessage() { }
 };
 
@@ -54,6 +58,10 @@ public:
 
     ViewerSubscribeResultMessage() {
         type = mViewerSubscribeResultType;
+    }
+
+    size_t id() const {
+        return viewer_id;
     }
 
     virtual ~ViewerSubscribeResultMessage() { }

@@ -68,7 +68,7 @@ protected:
         }
         std::unique_ptr<Message> message = MessageFromJson(message_from);
 
-        typedef SubscribeMessageType::ResultMessage AnswerMessage;
+        typedef typename SubscribeMessageType::ResultMessage AnswerMessage;
 
         std::unique_ptr<AnswerMessage> subscribe_result_message
                 (dynamic_cast<AnswerMessage *>(message.release()));
@@ -82,7 +82,7 @@ protected:
             std::cout << "Error: server refused to accept gamer" << std::endl;
             return false;
         }
-        id_ = subscribe_result_message->player_id;
+        id_ = subscribe_result_message->id();
         std::cout << "Gamer connected to server with id = " << id_ << std::endl;
         return true;
     }

@@ -6,6 +6,8 @@
 #include "game_objects.h"
 #include "utils.h"
 
+#pragma once
+
 class StrategyTask {
 public:
     virtual Point getTargetPoint(const World &world, const Ball &ball) {
