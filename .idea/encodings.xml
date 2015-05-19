@@ -2,8 +2,8 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/action_manager.h" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/angry_balls.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/game_objects.h" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/gamer_main.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/message_builder.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/message_parser.h" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/protocol.h" charset="UTF-8" />

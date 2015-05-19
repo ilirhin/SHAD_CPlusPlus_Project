@@ -44,20 +44,24 @@ std::unique_ptr<Message> ParseWorldStateMessage(const rapidjson::Document &docum
     world.coin_radius = document["coin_radius"].GetDouble();
     world.delta_time = document["time_delta"].GetDouble();
     world.max_velocity = document["velocity_max"].GetDouble();
-    for (rapidjson::SizeType ball_index = 0;
+    if (!document["players"].IsNull()) {
+        for (rapidjson::SizeType ball_index = 0;
          ball_index < document["players"].Size(); ++ball_index) {
-        const rapidjson::Value &ball_json = document["players"][ball_index];
-        Point position(ball_json["x"].GetDouble(), ball_json["y"].GetDouble());
-        Velocity velocity(ball_json["v_x"].GetDouble(), ball_json["v_y"].GetDouble());
-        Ball ball(ball_json["id"].GetUint(), position, velocity, ball_json["score"].GetDouble());
-        world.balls.push_back(ball);
+            const rapidjson::Value &ball_json = document["players"][ball_index];
+            Point position(ball_json["x"].GetDouble(), ball_json["y"].GetDouble());
+            Velocity velocity(ball_json["v_x"].GetDouble(), ball_json["v_y"].GetDouble());
+            Ball ball(ball_json["id"].GetUint(), position, velocity, ball_json["score"].GetDouble());
+            world.balls.push_back(ball);
+        }
     }
-    for (rapidjson::SizeType coin_index = 0;
-         coin_index < document["coins"].Size(); ++coin_index) {
-        const rapidjson::Value &coin_json = document["coins"][coin_index];
-        Point position(coin_json["x"].GetDouble(), coin_json["y"].GetDouble());
-        Coin coin(position, coin_json["value"].GetDouble());
-        world.coins.push_back(coin);
+    if (!document["coins"].IsNull()) {
+        for (rapidjson::SizeType coin_index = 0;
+             coin_index < document["coins"].Size(); ++coin_index) {
+            const rapidjson::Value &coin_json = document["coins"][coin_index];
+            Point position(coin_json["x"].GetDouble(), coin_json["y"].GetDouble());
+            Coin coin(position, coin_json["value"].GetDouble());
+            world.coins.push_back(coin);
+        }
     }
     message->world = world;
     return std::unique_ptr<Message>(message);
@@ -77,6 +81,12 @@ std::unique_ptr<Message> ParseFinishMessage(const rapidjson::Document &document)
 std::unique_ptr<Message> MessageFromJson(const std::string &json) {
     rapidjson::Document document;
     document.Parse(json.c_str());
+    if (!document.IsObject()) {
+        return std::unique_ptr<Message>(new Message());
+    }
+    if (!document.HasMember("type")) {
+        return std::unique_ptr<Message>(new Message());
+    }
     std::string message_type = document["type"].GetString();
     if (message_type == mGamerSubscribeRequestType) {
         return ParseGamerSubscribeRequestMessage(document);
