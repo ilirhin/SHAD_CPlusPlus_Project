@@ -8,15 +8,15 @@
 
 class StrategyTask {
 public:
-    virtual Point getTargetPoint(const World& world, const Ball& ball){
+    virtual Point getTargetPoint(const World &world, const Ball &ball) {
         return ball.position_;
     }
 
-    virtual bool isActual(const World& world, const Ball& ball) {
+    virtual bool isActual(const World &world, const Ball &ball) {
         return false;
     }
 
-    virtual ~StrategyTask() {}
+    virtual ~StrategyTask() { }
 };
 
 class TakeCoinTask : public StrategyTask {
@@ -24,16 +24,15 @@ private:
     Coin target_;
 
 public:
-    TakeCoinTask(const Coin& coin)
-            : target_(coin)
-    {
+    TakeCoinTask(const Coin &coin)
+            : target_(coin) {
     }
 
-    Point getTargetPoint(const World& world, const Ball& ball){
+    Point getTargetPoint(const World &world, const Ball &ball) {
         return target_.position_;
     }
 
-    bool isActual(const World& world, const Ball& ball) {
+    bool isActual(const World &world, const Ball &ball) {
         for (auto coin : world.coins) {
             if (dist(target_.position_, coin.position_) < 1e-2) {
                 return true;
@@ -51,7 +50,7 @@ private:
     int timeWithoutUpdate_;
     std::deque<StrategyTaskPtr> cachedTasks_;
 
-    void removeNonActualTasks(const World& world, const Ball& ball) {
+    void removeNonActualTasks(const World &world, const Ball &ball) {
         while (!cachedTasks_.empty()) {
             auto task = cachedTasks_.front();
             if (task->isActual(world, ball)) {
@@ -63,14 +62,12 @@ private:
 
 public:
     GlobalStrategy(int updateTime)
-            : updateTime_(updateTime)
-            , timeWithoutUpdate_(0)
-    {
+            : updateTime_(updateTime), timeWithoutUpdate_(0) {
     }
 
-    virtual ~GlobalStrategy() {}
+    virtual ~GlobalStrategy() { }
 
-    StrategyTaskPtr getTask(const World& world, const Ball& ball) {
+    StrategyTaskPtr getTask(const World &world, const Ball &ball) {
         removeNonActualTasks(world, ball);
         if (timeWithoutUpdate_ == updateTime_ || cachedTasks_.empty()) {
             cachedTasks_ = estimateActions(world, ball);
@@ -84,22 +81,22 @@ public:
         return result;
     }
 
-    virtual std::deque<StrategyTaskPtr> estimateActions(const World& world, const Ball& ball) = 0;
+    virtual std::deque<StrategyTaskPtr> estimateActions(const World &world, const Ball &ball) = 0;
 };
 
-typedef std::function<double(const Ball&, const Coin&)> Estimator;
+typedef std::function<double(const Ball &, const Coin &)> Estimator;
 
-double naiveDistEstimator(const Ball& ball, const Coin& coin) {
+double naiveDistEstimator(const Ball &ball, const Coin &coin) {
     return dist(ball.position_, coin.position_);
 }
 
 Estimator createVelocityDistEstimator(double velocityCoeff) {
-    return [&](const Ball& ball, const Coin& coin) {
+    return [&](const Ball &ball, const Coin &coin) {
         Point point(ball.position_.x_ + ball.velocity_.v_x_,
                     ball.position_.y_ + ball.velocity_.v_y_);
 
         return dist(ball.position_, coin.position_) +
-                velocityCoeff * rotateCos(ball.position_, point, coin.position_);
+               velocityCoeff * rotateCos(ball.position_, point, coin.position_);
     };
 }
 
@@ -109,12 +106,10 @@ private:
 
 public:
     NearestCoinStrategy(int updateTime, Estimator estimator = createVelocityDistEstimator(0))
-        : GlobalStrategy(updateTime)
-        , estimator_(estimator)
-    {
+            : GlobalStrategy(updateTime), estimator_(estimator) {
     }
 
-    std::deque<StrategyTaskPtr> estimateActions(const World& world, const Ball& ball) {
+    std::deque<StrategyTaskPtr> estimateActions(const World &world, const Ball &ball) {
         std::deque<StrategyTaskPtr> result;
         double dst = std::numeric_limits<double>::max();
         int pos = -1;
@@ -134,8 +129,9 @@ public:
 
 class MovementStrategy {
 public:
-    virtual Acceleration getAcceleration(const World& world,
-                                  StrategyTaskPtr strategyTaskPtr, const Ball& ball);
-    virtual ~MovementStrategy() {}
+    virtual Acceleration getAcceleration(const World &world,
+                                         StrategyTaskPtr strategyTaskPtr, const Ball &ball);
+
+    virtual ~MovementStrategy() { }
 };
 

@@ -7,16 +7,16 @@
 #ifndef SHAD_CPLUSPLUS_PROJECT_UTILS_H
 #define SHAD_CPLUSPLUS_PROJECT_UTILS_H
 
-double dist(const Point& first, const Point& second) {
+double dist(const Point &first, const Point &second) {
     return sqrt((first.x_ - second.x_) * (first.x_ - second.x_) +
-                        (first.y_ - second.y_) * (first.y_ - second.y_));
+                (first.y_ - second.y_) * (first.y_ - second.y_));
 }
 
-double product(const Point& first, const Point& second) {
+double product(const Point &first, const Point &second) {
     return first.x_ * second.x_ + first.y_ * second.y_;
 }
 
-double rotateCos(const Point& first, const Point& second, const Point& third) {
+double rotateCos(const Point &first, const Point &second, const Point &third) {
     double fx = first.x_;
     double sx = second.x_;
     double fy = first.y_;
