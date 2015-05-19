@@ -36,10 +36,58 @@ public:
         }
     }
 
-    virtual void run(size_t port);
+    virtual void run(size_t port) = 0;
 
 protected:
-    virtual bool connectToServer(size_t port);
+
+    template<class SubscribeMessageType>
+    bool subscribeForServer(size_t port, const SubscribeMessageType &request_message) {
+        int connected;
+        struct sockaddr_in addr;
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        do {
+            connected = connect(sock_, (struct sockaddr *) &addr, sizeof(addr));
+            std::cout << "Connection..." << std::endl;
+        } while (connected < 0);
+
+        std::string message_to = MessageToJson(&request_message);
+        int send = sendString(message_to);
+        if (send != message_to.size()) {
+            std::cout << "Error: can not send request message to server" << std::endl;
+            return false;
+        }
+
+        // Obtaining answer
+        std::string message_from;
+        int recv = recvString(message_from);
+        if (recv <= 0) {
+            std::cout << "Error: can not recv request message from server" << std::endl;
+            return false;
+        }
+        std::unique_ptr<Message> message = MessageFromJson(message_from);
+
+        typedef SubscribeMessageType::ResultMessage AnswerMessage;
+
+        std::unique_ptr<AnswerMessage> subscribe_result_message
+                (dynamic_cast<AnswerMessage *>(message.release()));
+
+        if (!subscribe_result_message) {
+            std::cout << "Error : bad response type" << std::endl;
+            return false;
+        }
+
+        if (!subscribe_result_message->result) {
+            std::cout << "Error: server refused to accept gamer" << std::endl;
+            return false;
+        }
+        id_ = subscribe_result_message->player_id;
+        std::cout << "Gamer connected to server with id = " << id_ << std::endl;
+        return true;
+    }
+
+    virtual bool connectToServer(size_t port) = 0;
 
     bool isFinishConnectionMessage(const std::string &finish_message_str) {
         std::unique_ptr<Message> message = MessageFromJson(finish_message_str);
@@ -62,15 +110,15 @@ protected:
     }
 
     int sendString(const std::string &str) {
-        int total_send = 0;
+        int total_sent = 0;
         while (true) {
-            int send = send(sock_, str.c_str() + total_send, str.size() - total_send, 0);
-            if (send <= 0) {
+            int sent = send(sock_, str.c_str() + total_sent, str.size() - total_sent, 0);
+            if (sent <= 0) {
                 break;
             }
-            total_send += send;
+            total_sent += sent;
         }
-        return total_send;
+        return total_sent;
     }
 
     int recvString(std::string &str) {
@@ -118,50 +166,10 @@ public:
 
 private:
     virtual bool connectToServer(size_t port) {
-        // Connecting
-        int connect;
-        struct sockaddr_in addr;
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-        do {
-            connect = connect(sock_, (struct sockaddr *) &addr, sizeof(addr));
-            std::cout << "Connection..." << std::endl;
-        } while (connect < 0);
-
-        // Sending request
-        GamerSubscribeRequestMessage request_message;
-        std::string message_to = MessageToJson(&request_message);
-        int send = sendString(message_to);
-        if (send != message_to.size()) {
-            std::cout << "Error: can not send request message to server" << std::endl;
-            return false;
-        }
-
-        // Obtaining answer
-        std::string message_from;
-        int recv = recvString(message_from);
-        if (recv <= 0) {
-            std::cout << "Error: can not recv request message from server" << std::endl;
-            return false;
-        }
-        std::unique_ptr<Message> message = MessageFromJson(message_from);
-        if (message->type != mGamerSubscribeResultType) {
-            std::cout << "Error : bad response type" << std::endl;
-            return false;
-        }
-        std::unique_ptr<GamerSubscribeResultMessage> subscribe_result_message
-                (dynamic_cast<GamerSubscribeResultMessage *>(message.release()));
-        if (!subscribe_result_message->result) {
-            std::cout << "Error: server refused to accept gamer" << std::endl;
-            return false;
-        }
-        id_ = subscribe_result_message->player_id;
-        std::cout << "Gamer connected to server with id = " << id_ << std::endl;
-        return true;
+        return subscribeForServer(port, GamerSubscribeRequestMessage());
     }
 
-    void performTurn(const World &world, std::string &turn_answer) const {
+    void performTurn(const World &world, std::string &turn_answer) {
         TurnMessage turn_message;
         turn_message.turn.ball_id_ = id_;
         turn_message.turn.world_id_ = world.world_id;
@@ -199,47 +207,7 @@ public:
 
 private:
     virtual bool connectToServer(size_t port) {
-        // Connecting
-        int connect;
-        struct sockaddr_in addr;
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-        do {
-            connect = connect(sock_, (struct sockaddr *) &addr, sizeof(addr));
-            std::cout << "Connection..." << std::endl;
-        } while (connect < 0);
-
-        // Sending request
-        ViewerSubscribeRequestMessage request_message;
-        std::string message_to = MessageToJson(&request_message);
-        int send = sendString(message_to);
-        if (send != message_to.size()) {
-            std::cout << "Error: can not send request message to server" << std::endl;
-            return false;
-        }
-
-        // Obtaining answer
-        std::string message_from;
-        int recv = recvString(message_from);
-        if (recv <= 0) {
-            std::cout << "Error: can not recv request message from server" << std::endl;
-            return false;
-        }
-        std::unique_ptr<Message> message = MessageFromJson(message_from);
-        if (message->type != mViewerSubscribeResultType) {
-            std::cout << "Error : bad response type" << std::endl;
-            return false;
-        }
-        std::unique_ptr<ViewerSubscribeResultMessage> subscribe_result_message
-                (dynamic_cast<ViewerSubscribeResultMessage *>(message.release()));
-        if (!subscribe_result_message->result) {
-            std::cout << "Error: server refused to accept viewer" << std::endl;
-            return false;
-        }
-        id_ = subscribe_result_message->viewer_id;
-        std::cout << "Viewer connected to server with id = " << id_ << std::endl;
-        return true;
+        return subscribeForServer(port, ViewerSubscribeRequestMessage());
     }
 
     void performView(const World &world) {

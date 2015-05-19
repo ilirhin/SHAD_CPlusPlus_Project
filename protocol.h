@@ -24,15 +24,6 @@ public:
     virtual ~Message() { }
 };
 
-class GamerSubscribeRequestMessage : public Message {
-public:
-    GamerSubscribeRequestMessage() {
-        type = mGamerSubscribeRequestType;
-    }
-
-    virtual ~GamerSubscribeRequestMessage() { }
-};
-
 class GamerSubscribeResultMessage : public Message {
 public:
     bool result;
@@ -45,13 +36,15 @@ public:
     virtual ~GamerSubscribeResultMessage() { }
 };
 
-class ViewerSubscribeRequestMessage : public Message {
+class GamerSubscribeRequestMessage : public Message {
 public:
-    ViewerSubscribeRequestMessage() {
-        type = mViewerSubscribeRequestType;
+    typedef GamerSubscribeResultMessage ResultMessage;
+
+    GamerSubscribeRequestMessage() {
+        type = mGamerSubscribeRequestType;
     }
 
-    virtual ~ViewerSubscribeRequestMessage() { }
+    virtual ~GamerSubscribeRequestMessage() { }
 };
 
 class ViewerSubscribeResultMessage : public Message {
@@ -64,6 +57,17 @@ public:
     }
 
     virtual ~ViewerSubscribeResultMessage() { }
+};
+
+class ViewerSubscribeRequestMessage : public Message {
+public:
+    typedef ViewerSubscribeResultMessage ResultMessage;
+
+    ViewerSubscribeRequestMessage() {
+        type = mViewerSubscribeRequestType;
+    }
+
+    virtual ~ViewerSubscribeRequestMessage() { }
 };
 
 class WorldStateMessage : public Message {
