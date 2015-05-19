@@ -1,14 +1,51 @@
 #include <QtGui>
 #include <QWidget>
-#include <QApplication>
-#include <string>
 
 #include "game_objects.h"
 
-class Field : public QWidget {
+class Notifier : public QObject {
+    Q_OBJECT
 public:
-    Field(const World &world, int window_size = 768) : world_(world),
+    Notifier() {}
+
+    ~Notifier() {}
+
+    void updateWorld(const World& new_world) {
+        // update world
+        emit notifyUpdateWorld(new_world);
+    }
+
+    void startShowing(const World& new_world) {
+        // start working
+        emit notifyStartShowing(new_world);
+    }
+
+    void finishShowing() {
+        // finish working
+        emit notifyFinishShowing();
+    }
+
+signals:
+    void notifyUpdateWorld(const World& new_world);
+
+    void notifyStartShowing(const World& new_world);
+
+    void notifyFinishShowing();
+};
+
+class Field : public QWidget {
+    Q_OBJECT
+public:
+    Field(Notifier* notifier, int window_size = 768) : notifier(notifier),
                                                         window_size_(window_size) {
+        {
+            qRegisterMetaType<World>("World");
+            connect(notifier, SIGNAL(notifyUpdateWorld(const World&)), this,
+                SLOT(updateWorld(const World&)));
+            connect(notifier, SIGNAL(notifyStartShowing(const World&)), this,
+                SLOT(startShowing(const World&)));
+            connect(notifier, SIGNAL(notifyFinishShowing()), this, SLOT(close()));
+        }
         resize(window_size_ , window_size_);
     }
 
@@ -73,7 +110,19 @@ public:
         paint.eraseRect(0, 0, window_size_, window_size_);
     }
 
+public slots:
+    void updateWorld(const World& new_world) {
+        world_ = new_world;
+        update();
+    }
+
+    void startShowing(const World& new_world) {
+        world_ = new_world;
+        show();
+    }
+
 private:
     World world_;
+    Notifier* notifier;
     int window_size_;
 };
