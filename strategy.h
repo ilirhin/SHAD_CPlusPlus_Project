@@ -137,3 +137,51 @@ public:
     virtual ~MovementStrategy() { }
 };
 
+class FirstMovementStrategyImpl : public MovementStrategy {
+    Acceleration getAcceleration(const World &world,
+                                         StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
+        Point targerPoint = strategyTaskPtr->getTargetPoint(world, ball);
+        Velocity currentVelocity = ball.velocity_;
+        Point currentPosition = ball.position_;
+
+        double accelerationX = targerPoint.x_ + currentVelocity.v_x_ - targerPoint.x_;
+        double accelerationY = targerPoint.y_ + currentVelocity.v_y_ - targerPoint.y_;
+
+        double length = getNorm(Point(accelerationX, accelerationY));
+
+        return Acceleration(accelerationX / length, accelerationY / length);
+    }
+};
+
+class SecondMovementStrategyImpl : public MovementStrategy {
+    Acceleration getAcceleration(const World &world,
+                                         StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
+        Point targerPoint = strategyTaskPtr->getTargetPoint(world, ball);
+        Velocity currentVelocity = ball.velocity_;
+        Point currentPosition = ball.position_;
+
+        double rotationAngle = getAngleToOX(currentPosition, targerPoint);
+
+        Velocity rotatedVelocity = rotateAndMove(currentVelocity, currentPosition, rotationAngle);
+
+        double accelerationY = std::min(1.0, rotatedVelocity.v_y_);
+        double accelerationX = sqrt(1 - accelerationY * accelerationY);
+
+        Velocity accelerationInOld = rotateAndMove(Velocity(accelerationX, accelerationY), 
+                                                   Point(-currentPosition.x_, -currentPosition.y_),
+                                                   -rotationAngle);
+        double length = getNorm(Point(accelerationInOld.v_x_, accelerationInOld.v_y_));
+        return Acceleration(accelerationInOld.v_x_ / length,
+                            accelerationInOld.v_y_ / length);
+    }
+};
+
+class RandomMovementStrategyImpl : public MovementStrategy {
+    Acceleration getAcceleration(const World &world,
+                                         StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
+        double a_x = rand() - RAND_MAX / 2;
+        double b_x = rand() - RAND_MAX / 2;
+        double length = a_x * a_x + b_x * b_x;
+        return Acceleration(a_x / length, b_x / length);
+    }
+};

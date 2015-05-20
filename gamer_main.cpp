@@ -8,7 +8,7 @@
 
 int main(int argc, char *argv[]) {
     assert(argc == 2);
-    int port = std::stoi(argv[1]);
+    int port = std::atoi(argv[1]);
     Gamer gamer = Gamer(ActionManager());
     gamer.run(port);
     return 0;
