@@ -3,6 +3,8 @@
 
 #include "game_objects.h"
 
+#pragma once
+
 class Notifier : public QObject {
     Q_OBJECT
 public:

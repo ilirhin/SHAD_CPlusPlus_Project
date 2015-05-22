@@ -1,4 +1,5 @@
 #include "strategy.h"
+#include "viewer.h"
 #pragma once
 
 class ActionManager {
@@ -19,8 +20,13 @@ public:
                 getAcceleration(world, globalStrategyPtr->getTask(world, ball), ball);
     }
 
-    void performViewerAction(const World &world) {
-        std::cout << "Viewer performs action" << std::endl;
-        // ToDo
+    void performViewerAction(const World &world, Notifier* notifier, bool& show_first_time) {
+        //std::cout << "Viewer performs action" << std::endl;
+        if (show_first_time) {
+            show_first_time = false;
+            notifier->startShowing(world);
+        } else {
+            notifier->updateWorld(world);
+        }
     }
 };

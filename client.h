@@ -13,6 +13,7 @@
 #include "action_manager.h"
 #include "message_builder.h"
 #include "message_parser.h"
+#include "viewer.h"
 
 #pragma once
 
@@ -198,21 +199,25 @@ private:
 };
 
 class Viewer : public Client {
+private:
+    Notifier* notifier_;
 public:
-    explicit Viewer(const ActionManager &actionManager) :
-            Client(actionManager) { }
+    explicit Viewer(const ActionManager &actionManager, Notifier* notifier) :
+            Client(actionManager), notifier_(notifier) { }
 
     void run(size_t port) {
         if (!connectToServer(port)) {
             return;
         }
+        bool show_first_time = true;
         std::string message_str;
         while (recvString(message_str) >= 0) {
             World world_state;
             if (isFinishConnectionMessage(message_str)) {
+                notifier_->finishShowing();
                 return;
             } else if (isWorldStateMessage(message_str, world_state)) {
-                performView(world_state);
+                performView(world_state, show_first_time);
             }
         }
     }
@@ -222,7 +227,7 @@ private:
         return subscribeForServer(port, ViewerSubscribeRequestMessage());
     }
 
-    void performView(const World &world) {
-        actionManager_.performViewerAction(world);
+    void performView(const World &world, bool& show_first_time) {
+        actionManager_.performViewerAction(world, notifier_, show_first_time);
     }
 };
