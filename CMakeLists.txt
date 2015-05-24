@@ -7,4 +7,4 @@ set(HEADER_FILES)
 set(SOURCE_FILES gamer_main.cpp)
 
 
-add_executable(SHAD_CPlusPlus_Project ${SOURCE_FILES} ${HEADER_FILES})
+add_executable(SHAD_CPlusPlus_Project ${SOURCE_FILES} ${HEADER_FILES} strategy_loader.h strategy_loader.cpp)

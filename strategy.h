@@ -1,7 +1,9 @@
+#include <algorithm>
 #include <memory>
 #include <deque>
 #include <numeric>
 #include <limits>
+#include <set>
 
 #include "game_objects.h"
 #include "utils.h"
@@ -86,19 +88,36 @@ public:
     virtual std::deque<StrategyTaskPtr> estimateActions(const World &world, const Ball &ball) = 0;
 };
 
-typedef std::function<double(const Ball &, const Coin &)> Estimator;
+typedef std::function<double(const World &, const Ball &, const Coin &)> Estimator;
 
-double naiveDistEstimator(const Ball &ball, const Coin &coin) {
+double naiveDistEstimator(const World &, const Ball &ball, const Coin &coin) {
     return dist(ball.position_, coin.position_);
 }
 
 Estimator createVelocityDistEstimator(double velocityCoeff) {
-    return [&](const Ball &ball, const Coin &coin) {
+    return [&](const World &, const Ball &ball, const Coin &coin) {
         Point point(ball.position_.x_ + ball.velocity_.v_x_,
                     ball.position_.y_ + ball.velocity_.v_y_);
 
         return dist(ball.position_, coin.position_) +
                velocityCoeff * rotateCos(ball.position_, point, coin.position_);
+    };
+}
+
+template <typename KernelFunction>
+Estimator createDensityEstimator(double densityCoeff, KernelFunction kernel) {
+    return [&](const World &word, const Ball &ball, const Coin &coin) {
+        double ans = 0;
+        for (const Ball& nBall : world.balls) {
+            ans += kernel(dist(coin.position_, nBall.position_));
+        }
+        return ans * densityCoeff;
+    };
+}
+
+Estimator createComboEstimator(Estimator first, Estimator second) {
+    return [&](const World &world, const Ball &ball, const Coin &coin) {
+        return first(world, ball, coin) + second(world, ball, coin);
     };
 }
 
@@ -116,13 +135,87 @@ public:
         double dst = std::numeric_limits<double>::max();
         int pos = -1;
         for (int i = 0; i < world.coins.size(); ++i) {
-            double value = estimator_(ball, world.coins[i]);
+            double value = estimator_(world, ball, world.coins[i]);
             if (value < dst) {
                 dst = value;
                 pos = i;
             }
         }
         if (pos >= 0) {
+            result.emplace_back(new TakeCoinTask(world.coins[pos]));
+        }
+        return result;
+    }
+};
+
+class KNearestCoinsStrategy : public GlobalStrategy {
+private:
+    int kValue_;
+
+    std::vector<std::vector<double>> buildDistances(const World &world) {
+        std::vector<std::vector<double>> dists(world.coins.size());
+        for (size_t i = 0; i < dists.size(); ++i) {
+            for (size_t j = 0; j < dist.size(); ++j) {
+                dists[i].push_back(dist(world.coins[i].position_, world.coins[j].position_));
+            }
+        }
+        return dists;
+    }
+
+    std::vector<std::vector<int>> sortedNeighboures(const std::vector<std::vector<double>> &dists) {
+        std::vector<std::vector<int>> nearests;
+        for (size_t i = 0; i < dists.size(); ++i) {
+            nearests[i].assign(dists.size(), 0);
+            std::iota(nearests[i].begin(), nearests[i].end(), 0);
+            auto comparator = [&](int first, int second) {
+                return dists[i][first] < dists[i][second] ||
+                       dists[i][first] == dists[i][second] && first < second;
+            };
+            std::sort(nearests[i].begin(), nearests[i].end(), comparator);
+        }
+        return nearests;
+    }
+
+public:
+
+    KNearestCoinsStrategy(int updateTime, int kValue)
+            : GlobalStrategy(updateTime), kValue_(kValue) {
+    }
+
+    std::deque<StrategyTaskPtr> estimateActions(const World &world, const Ball &ball) {
+        std::deque<StrategyTaskPtr> result;
+        std::vector<std::vector<double>> dists = buildDistances(world);
+        std::vector<std::vector<int>> nearests = sortedNeighboures(dists);
+
+        double bestLen = std::numeric_limits<double>::max();
+        std::vector<int> bestRoute;
+
+        for (int start = 0; start < dists.size(); ++start) {
+            std::vector<char> usedInRoute(dists.size());
+            std::vector<int> nextCandidates(dists.size());
+
+            int curr = start;
+            double len = dist(ball.position_, world.coins[start].position_);
+            usedInRoute[start] = true;
+            std::vector<int> route({start});
+
+            for (int iter = 1; iter < kValue_; ++iter) {
+                while (usedInRoute[nearests[curr][nextCandidates[curr]]]) {
+                    ++nextCandidates[curr];
+                }
+                int newCurr = nearests[curr][nextCandidates[curr]];
+                len += dist(world.coins[curr].position_, world.coins[newCurr]);
+                curr = newCurr;
+                usedInRoute[curr] = true;
+                route.push_back(curr);
+            }
+            if (len < bestLen) {
+                bestLen = len;
+                bestRoute = route;
+            }
+        }
+
+        for (int pos : bestRoute) {
             result.emplace_back(new TakeCoinTask(world.coins[pos]));
         }
         return result;
@@ -139,7 +232,7 @@ public:
 
 class FirstMovementStrategyImpl : public MovementStrategy {
     Acceleration getAcceleration(const World &world,
-                                         StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
+                                 StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
         Point targerPoint = strategyTaskPtr->getTargetPoint(world, ball);
         Velocity currentVelocity = ball.velocity_;
         Point currentPosition = ball.position_;
@@ -155,7 +248,7 @@ class FirstMovementStrategyImpl : public MovementStrategy {
 
 class SecondMovementStrategyImpl : public MovementStrategy {
     Acceleration getAcceleration(const World &world,
-                                         StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
+                                 StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
         Point targerPoint = strategyTaskPtr->getTargetPoint(world, ball);
         Velocity currentVelocity = ball.velocity_;
         Point currentPosition = ball.position_;
@@ -167,7 +260,7 @@ class SecondMovementStrategyImpl : public MovementStrategy {
         double accelerationY = std::min(1.0, rotatedVelocity.v_y_);
         double accelerationX = sqrt(1 - accelerationY * accelerationY);
 
-        Velocity accelerationInOld = rotateAndMove(Velocity(accelerationX, accelerationY), 
+        Velocity accelerationInOld = rotateAndMove(Velocity(accelerationX, accelerationY),
                                                    Point(-currentPosition.x_, -currentPosition.y_),
                                                    -rotationAngle);
         double length = getNorm(Point(accelerationInOld.v_x_, accelerationInOld.v_y_));
@@ -178,10 +271,14 @@ class SecondMovementStrategyImpl : public MovementStrategy {
 
 class RandomMovementStrategyImpl : public MovementStrategy {
     Acceleration getAcceleration(const World &world,
-                                         StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
+                                 StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
         double a_x = rand() - RAND_MAX / 2;
         double b_x = rand() - RAND_MAX / 2;
         double length = a_x * a_x + b_x * b_x;
         return Acceleration(a_x / length, b_x / length);
     }
 };
+
+int main() {
+    return 0;
+}
