@@ -104,8 +104,21 @@ Estimator createVelocityDistEstimator(double velocityCoeff) {
     };
 }
 
+Estimator createAreaDensityEstimator(double densityCoeff) {
+    return [&](const World &word, const Ball &ball, const Coin &coin) {
+        double ans = 0;
+        for (const Ball& nBall : world.balls) {
+            if ((nBall.position_.x_ - ball.position_.x_) * (nBall.position_.x_ - coin.position_.x_) < 0 &&
+                        (nBall.position_.y_ - ball.position_.y_) * (nBall.position_.y_ - coin.position_.y_) < 0) {
+                ans += 1;
+            }
+        }
+        return ans * densityCoeff;
+    };
+}
+
 template <typename KernelFunction>
-Estimator createDensityEstimator(double densityCoeff, KernelFunction kernel) {
+Estimator createCoinDensityEstimator(double densityCoeff, KernelFunction kernel) {
     return [&](const World &word, const Ball &ball, const Coin &coin) {
         double ans = 0;
         for (const Ball& nBall : world.balls) {
