@@ -105,7 +105,7 @@ Estimator createVelocityDistEstimator(double velocityCoeff) {
 }
 
 Estimator createAreaDensityEstimator(double densityCoeff) {
-    return [&](const World &word, const Ball &ball, const Coin &coin) {
+    return [&](const World &world, const Ball &ball, const Coin &coin) {
         double ans = 0;
         for (const Ball& nBall : world.balls) {
             if ((nBall.position_.x_ - ball.position_.x_) * (nBall.position_.x_ - coin.position_.x_) < 0 &&
@@ -119,7 +119,7 @@ Estimator createAreaDensityEstimator(double densityCoeff) {
 
 template <typename KernelFunction>
 Estimator createCoinDensityEstimator(double densityCoeff, KernelFunction kernel) {
-    return [&](const World &word, const Ball &ball, const Coin &coin) {
+    return [&](const World &world, const Ball &ball, const Coin &coin) {
         double ans = 0;
         for (const Ball& nBall : world.balls) {
             ans += kernel(dist(coin.position_, nBall.position_));
@@ -168,7 +168,7 @@ private:
     std::vector<std::vector<double>> buildDistances(const World &world) {
         std::vector<std::vector<double>> dists(world.coins.size());
         for (size_t i = 0; i < dists.size(); ++i) {
-            for (size_t j = 0; j < dist.size(); ++j) {
+            for (size_t j = 0; j < dists.size(); ++j) {
                 dists[i].push_back(dist(world.coins[i].position_, world.coins[j].position_));
             }
         }
@@ -217,7 +217,7 @@ public:
                     ++nextCandidates[curr];
                 }
                 int newCurr = nearests[curr][nextCandidates[curr]];
-                len += dist(world.coins[curr].position_, world.coins[newCurr]);
+                len += dist(world.coins[curr].position_, world.coins[newCurr].position_);
                 curr = newCurr;
                 usedInRoute[curr] = true;
                 route.push_back(curr);
@@ -240,7 +240,7 @@ public:
     virtual Acceleration getAcceleration(const World &world,
                                          StrategyTaskPtr strategyTaskPtr, const Ball &ball);
 
-    virtual ~MovementStrategy() { }
+    virtual ~MovementStrategy() {}
 };
 
 class FirstMovementStrategyImpl : public MovementStrategy {
@@ -292,6 +292,3 @@ class RandomMovementStrategyImpl : public MovementStrategy {
     }
 };
 
-int main() {
-    return 0;
-}

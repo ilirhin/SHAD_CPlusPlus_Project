@@ -1,5 +1,5 @@
 #include "strategy.h"
-#include "viewer.h"
+// #include "viewer.h"
 #pragma once
 
 class ActionManager {

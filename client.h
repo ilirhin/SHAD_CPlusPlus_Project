@@ -13,7 +13,7 @@
 #include "action_manager.h"
 #include "message_builder.h"
 #include "message_parser.h"
-#include "viewer.h"
+// #include "viewer.h"
 
 #pragma once
 
