@@ -129,7 +129,7 @@ Estimator createCoinDensityEstimator(double densityCoeff, KernelFunction kernel)
 }
 
 Estimator createComboEstimator(Estimator first, Estimator second) {
-    return [=]](const World &world, const Ball &ball, const Coin &coin) {
+    return [=](const World &world, const Ball &ball, const Coin &coin) {
         return first(world, ball, coin) + second(world, ball, coin);
     };
 }
