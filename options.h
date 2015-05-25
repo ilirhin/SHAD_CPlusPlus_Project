@@ -44,20 +44,25 @@ public:
         port_ = std::atoi(port.c_str());
 
         if (str == NEAREST_COIN_STR) {
-            globalStrategy_ = std::make_shared<GlobalStrategy>(new NearestCoinStrategy(1));
+            // globalStrategy_ = std::make_shared<GlobalStrategy>(new NearestCoinStrategy(1));
+            globalStrategy_.reset(new NearestCoinStrategy(1));
         } else if (str == K_NEAREST_COIN_STR) {
-            globalStrategy_ = std::make_shared<GlobalStrategy>(new KNearestCoinsStrategy(1, std::atoi(count.c_str())));
+            // globalStrategy_ = std::make_shared<GlobalStrategy>(new KNearestCoinsStrategy(1, std::atoi(count.c_str())));
+            globalStrategy_.reset(new KNearestCoinsStrategy(1, std::atoi(count.c_str())));
         } else {
             std::cerr << GetWrongParameterMessage(argv[0], GLOBAL_STR_PARAM_NAME);
             exit(0);
         }
 
         if (mov_str == MOVE_STR_FIRST) {
-            movementStrategy_ = std::make_shared<MovementStrategy>(new FirstMovementStrategyImpl());
+            //movementStrategy_ = std::make_shared<MovementStrategy>(new FirstMovementStrategyImpl());
+            movementStrategy_.reset(new FirstMovementStrategyImpl());
         } else if (mov_str == MOVE_STR_SECOND) {
-            movementStrategy_ = std::make_shared<MovementStrategy>(new SecondMovementStrategyImpl());
+            // movementStrategy_ = std::make_shared<MovementStrategy>(new SecondMovementStrategyImpl());
+            movementStrategy_.reset(new SecondMovementStrategyImpl());
         } else if (mov_str == MOVE_STR_RANDOM) {
-            movementStrategy_ = std::make_shared<MovementStrategy>(new RandomMovementStrategyImpl());
+            // movementStrategy_ = std::make_shared<MovementStrategy>(new RandomMovementStrategyImpl());
+            movementStrategy_.reset(new RandomMovementStrategyImpl());
         } else {
             std::cerr << GetWrongParameterMessage(argv[0], MOVEMENT_STR_PARAM_NAME);
             exit(0);   
