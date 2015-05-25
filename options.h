@@ -68,11 +68,11 @@ public:
         return port_;
     }
 
-    std::shared_ptr<GlobalStrategy> GetGlobalStrategy() const {
+    std::shared_ptr<GlobalStrategy> GetGlobalStrategy() {
         return globalStrategy_;
     }
 
-    std::shared_ptr<MovementStrategy> GetMovementStrategy() const {
+    std::shared_ptr<MovementStrategy> GetMovementStrategy() {
         return movementStrategy_;
     }
 
