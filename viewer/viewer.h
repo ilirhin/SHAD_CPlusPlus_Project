@@ -53,34 +53,38 @@ public:
 
     void drawBall(QPainter &paint, const Ball &ball) {
         paint.setBrush(Qt::red);
-        paint.drawEllipse(QPointF(ball.position_.x_, ball.position_.y_),
+        double ball_position_x_on_field = ball.position_.x_ + static_cast<double>(window_size_ / 2);
+        double ball_position_y_on_field = ball.position_.y_ + static_cast<double>(window_size_ / 2);
+        paint.drawEllipse(QPointF(ball_position_x_on_field, ball_position_y_on_field),
                                 world_.ball_radius,
                                 world_.ball_radius);
         QFont font = paint.font();
         font.setBold(true);
         paint.setFont(font);
         paint.setBrush(Qt::blue);
-        paint.drawText(QRectF(ball.position_.x_ - 5,
-                                ball.position_.y_ - 10.0,
+        paint.drawText(QRectF(ball_position_x_on_field - 5,
+                                ball_position_y_on_field - 10.0,
                                 100.0, 100.0),
                         QString::number(ball.id_));
         font.setBold(false);
         paint.setFont(font);
         paint.setBrush(Qt::black);
-        paint.drawText(QRectF(ball.position_.x_ - world_.ball_radius,
-                                ball.position_.y_ + world_.ball_radius,
+        paint.drawText(QRectF(ball_position_x_on_field - world_.ball_radius,
+                                ball_position_y_on_field + world_.ball_radius,
                                 100.0, 100.0),
                         QString::number(ball.score_, 'd', 1));
     }
 
     void drawCoin(QPainter &paint, const Coin &coin) {
         paint.setBrush(Qt::yellow);
-        paint.drawEllipse(QPointF(coin.position_.x_, coin.position_.y_),
+        double coin_position_x_on_field = coin.position_.x_ + static_cast<double>(window_size_ / 2);
+        double coin_position_y_on_field = coin.position_.y_ + static_cast<double>(window_size_ / 2);
+        paint.drawEllipse(QPointF(coin_position_x_on_field, coin_position_y_on_field),
                                 world_.coin_radius,
                                 world_.coin_radius);
         paint.setBrush(Qt::black);
-        paint.drawText(QRectF(coin.position_.x_ - world_.coin_radius,
-                                coin.position_.y_ + world_.coin_radius,
+        paint.drawText(QRectF(coin_position_x_on_field - world_.coin_radius,
+                                coin_position_y_on_field + world_.coin_radius,
                                 100.0, 100.0),
                         QString::number(coin.value_, 'd', 1));
     }
