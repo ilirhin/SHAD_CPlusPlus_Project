@@ -119,7 +119,7 @@ Estimator createAreaDensityEstimator(double densityCoeff) {
 
 template <typename KernelFunction>
 Estimator createCoinDensityEstimator(double densityCoeff, KernelFunction kernel) {
-    return [&](const World &world, const Ball &ball, const Coin &coin) {
+    return [=](const World &world, const Ball &ball, const Coin &coin) {
         double ans = 0;
         for (const Ball& nBall : world.balls) {
             ans += kernel(dist(coin.position_, nBall.position_));
@@ -129,7 +129,7 @@ Estimator createCoinDensityEstimator(double densityCoeff, KernelFunction kernel)
 }
 
 Estimator createComboEstimator(Estimator first, Estimator second) {
-    return [&](const World &world, const Ball &ball, const Coin &coin) {
+    return [=]](const World &world, const Ball &ball, const Coin &coin) {
         return first(world, ball, coin) + second(world, ball, coin);
     };
 }
@@ -238,7 +238,7 @@ public:
 class MovementStrategy {
 public:
     virtual Acceleration getAcceleration(const World &world,
-                                         StrategyTaskPtr strategyTaskPtr, const Ball &ball);
+                                         StrategyTaskPtr strategyTaskPtr, const Ball &ball) = 0;
 
     virtual ~MovementStrategy() {}
 };
