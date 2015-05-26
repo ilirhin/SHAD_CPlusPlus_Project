@@ -256,8 +256,8 @@ class FirstMovementStrategyImpl : public MovementStrategy {
         Velocity currentVelocity = ball.velocity_;
         Point currentPosition = ball.position_;
 
-        double accelerationX = targerPoint.x_ - currentPosition.x_;
-        double accelerationY = targerPoint.y_ - currentPosition.y_;
+        double accelerationX = targerPoint.x_ - currentPosition.x_ + currentVelocity.x_;
+        double accelerationY = targerPoint.y_ - currentPosition.y_ + currentVelocity.y_;
 
         double length = getNorm(Point(accelerationX, accelerationY)) + 1e-4;
 
@@ -272,18 +272,24 @@ class SecondMovementStrategyImpl : public MovementStrategy {
         Velocity currentVelocity = ball.velocity_;
         Point currentPosition = ball.position_;
         std::cerr << "Target: " << targerPoint.x_ << " " << targerPoint.y_ << std::endl;
-        double rotationAngle = getAngleToOX(currentPosition, targerPoint);
-        Velocity rotatedVelocity = rotateAndMove(currentVelocity, currentPosition, rotationAngle);
+        
+        Point targetRelative(targerPoint.x_ - currentPosition.x_, targerPoint.y_ - currentPosition.y_);
+        Point targetRelaviteNorm(targetRelative.x_ / (getNorm(targetRelative) + 1e-4), targetRelative.y_ / (getNorm(targetRelative) + 1e-4));
 
-        double accelerationY = std::min(1.0, rotatedVelocity.v_y_);
-        double accelerationX = sqrt(1 - accelerationY * accelerationY);
+        double proection = scalarMult(Point(currentVelocity.v_x_, currentVelocity.v_y_), targetRelative);
 
-        Velocity accelerationInOld = rotateAndMove(Velocity(accelerationX, accelerationY),
-                                                   Point(-currentPosition.x_, -currentPosition.y_),
-                                                   -rotationAngle);
-        double length = getNorm(Point(accelerationInOld.v_x_, accelerationInOld.v_y_)) + 1e-4;
-        return Acceleration(accelerationInOld.v_x_ / length,
-                            accelerationInOld.v_y_ / length);
+        Point perpendicular(-targetRelative.y_, targetRelative.x_);
+        Point perpNorm(-targetRelative.y_ / getNorm(perpendicular), targetRelative.x_ / getNorm(perpendicular));
+
+        double perpProection = scalarMult(Point(currentVelocity.v_x_, currentVelocity.v_y_), perpNorm);
+
+        Point accByPerp(-perpProection * perpNorm.x_, -perpProection * perpNorm.y_);
+
+        double restAcc = 1 - std::min(1.0, getNorm(accByPerp));
+
+        Point accToTarget(restAcc * targetRelaviteNorm.x_, restAcc * targetRelaviteNorm.y_);
+
+        return Acceleration(accByPerp.x_ + accToTarget.x_, accByPerp.y_ + accToTarget.y_);
     }
 };
 

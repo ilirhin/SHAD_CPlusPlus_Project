@@ -29,6 +29,10 @@ double rotateCos(const Point &first, const Point &second, const Point &third) {
     return (fx * sx + fy * sy) / sqrt(fx * fx + fy * fy + 1e-4) / sqrt(sx * sx + sy * sy + 1e-4);
 }
 
+double scalarMult(const Point &first, const Point &second) {
+    return (first.x_ * second.x_ + first.y_ * second.y_) / (getNorm(second) + 1e-4);
+}
+
 double cosBetweenVectors(const Point &first, const Point &second) {
     return product(first, second) / getNorm(first) / getNorm(second);
 }
