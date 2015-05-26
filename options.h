@@ -13,6 +13,7 @@ public:
         std::string str = "0";
         std::string mov_str;
         std::string count;
+        std::string confidence = "1";
 
         int cur_param = 1;
 
@@ -31,6 +32,9 @@ public:
             } else if (cur_param_name == COINS_COUNT_PARAM_NAME) {
                 count = argv[cur_param + 1];
                 cur_param += 2;
+            } else if (cur_param_name == STRATEGY_CONFIDENCE) {
+                condidence = argv[cur_param + 1];
+                cur_param += 2;
             } else if (cur_param_name == HELP_MESSAGE_NAME) {
                 std::cerr << GetHelpMessage(argv[0]) << "\n";
                 exit(0);
@@ -45,10 +49,10 @@ public:
 
         if (str == NEAREST_COIN_STR) {
             // globalStrategy_ = std::make_shared<GlobalStrategy>(new NearestCoinStrategy(1));
-            globalStrategy_.reset(new NearestCoinStrategy(10));
+            globalStrategy_.reset(new NearestCoinStrategy(std::atoi(confidence.c_str())));
         } else if (str == K_NEAREST_COIN_STR) {
             // globalStrategy_ = std::make_shared<GlobalStrategy>(new KNearestCoinsStrategy(1, std::atoi(count.c_str())));
-            globalStrategy_.reset(new KNearestCoinsStrategy(10, std::atoi(count.c_str())));
+            globalStrategy_.reset(new KNearestCoinsStrategy(std::atoi(confidence.c_str()), std::atoi(count.c_str())));
         } else {
             std::cerr << GetWrongParameterMessage(argv[0], GLOBAL_STR_PARAM_NAME);
             exit(0);
@@ -86,6 +90,7 @@ private:
     const std::string GLOBAL_STR_PARAM_NAME   = "--global-strategy";
     const std::string MOVEMENT_STR_PARAM_NAME = "--movement-strategy";
     const std::string COINS_COUNT_PARAM_NAME  = "--coins-count";
+    const std::string STRATEGY_CONFIDENCE  = "--global-update-time";
     const std::string HELP_MESSAGE_NAME       = "--help";
 
     const std::string NEAREST_COIN_STR        = "nearest-coins-strategy";
@@ -117,6 +122,7 @@ private:
                                         GLOBAL_STR_PARAM_NAME + " STRATEGY " +
                                         MOVEMENT_STR_PARAM_NAME + " MOVEMENT-STRATEGY " +
                                         COINS_COUNT_PARAM_NAME + " COUNT" + "\n" +
+                                        STRATEGY_CONFIDENCE + " COUNT" + "\n" +
                                         "  " + GLOBAL_STR_PARAM_NAME + "   nearest-coins-strategy, k-nearest-coin-strategy" + "\n" +
                                         "  " + COINS_COUNT_PARAM_NAME + "       parameter for k-nearest coin strategy" + "\n" +
                                         "  " + MOVEMENT_STR_PARAM_NAME + " first, second or random";
