@@ -12,12 +12,12 @@ public:
 
     ~Notifier() {}
 
-    void updateWorld(const World& new_world) {
+    void updateWorld(World new_world) {
         // update world
         emit notifyUpdateWorld(new_world);
     }
 
-    void startShowing(const World& new_world) {
+    void startShowing(World new_world) {
         // start working
         emit notifyStartShowing(new_world);
     }
