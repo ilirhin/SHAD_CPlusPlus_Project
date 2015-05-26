@@ -276,8 +276,6 @@ class SecondMovementStrategyImpl : public MovementStrategy {
         Point targetRelative(targerPoint.x_ - currentPosition.x_, targerPoint.y_ - currentPosition.y_);
         Point targetRelaviteNorm(targetRelative.x_ / (getNorm(targetRelative) + 1e-4), targetRelative.y_ / (getNorm(targetRelative) + 1e-4));
 
-        double proection = scalarMult(Point(currentVelocity.v_x_, currentVelocity.v_y_), targetRelative);
-
         Point perpendicular(-targetRelative.y_, targetRelative.x_);
         Point perpNorm(-targetRelative.y_ / (getNorm(perpendicular) + 1e-4), targetRelative.x_ / (getNorm(perpendicular) + 1e-4));
 
@@ -285,7 +283,7 @@ class SecondMovementStrategyImpl : public MovementStrategy {
 
         Point accByPerp(-perpProection * perpNorm.x_, -perpProection * perpNorm.y_);
 
-        double restAcc = 1 - std::min(1.0, getNorm(accByPerp));
+        double restAcc = sqrt(1 - std::min(1.0, getNorm(accByPerp)));
 
         Point accToTarget(restAcc * targetRelaviteNorm.x_, restAcc * targetRelaviteNorm.y_);
 
