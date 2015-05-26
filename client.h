@@ -137,10 +137,10 @@ protected:
             return -1;
         }
         size_t message_length = *(u_int32_t *)buf_length;
-        char buf[1024];
+        char buf[10240];
         int total_reads = 0;
         while (total_reads < message_length) {
-            int reads = recv(sock_, buf, 1024, 0);
+            int reads = recv(sock_, buf, 10240, 0);
             if (reads < 0) {
                 return -1;
             }
@@ -189,8 +189,9 @@ private:
         turn_message.turn.world_id_ = world.world_id;
         for (const Ball &ball : world.balls) {
             if (ball.id_ == id_) {
-                //turn_message.turn.acceleration_ = actionManager_.performGamerAction(world, ball);
-                turn_message.turn.acceleration_ = Acceleration(0.0, 0.1);
+                turn_message.turn.acceleration_ = actionManager_.performGamerAction(world, ball);
+                std::cerr << turn_message.turn.acceleration_.a_x_ << " " << turn_message.turn.acceleration_.a_y_ << std::endl;
+                //turn_message.turn.acceleration_ = Acceleration(0.0, 0.1);
                 break;
             }
         }

@@ -176,7 +176,7 @@ private:
     }
 
     std::vector<std::vector<int>> sortedNeighboures(const std::vector<std::vector<double>> &dists) {
-        std::vector<std::vector<int>> nearests;
+        std::vector<std::vector<int>> nearests(dists.size());
         for (size_t i = 0; i < dists.size(); ++i) {
             nearests[i].assign(dists.size(), 0);
             std::iota(nearests[i].begin(), nearests[i].end(), 0);
@@ -198,6 +198,7 @@ public:
     std::deque<StrategyTaskPtr> estimateActions(const World &world, const Ball &ball) {
         std::deque<StrategyTaskPtr> result;
         std::vector<std::vector<double>> dists = buildDistances(world);
+        int coinsAmount = world.coins.size();
         std::vector<std::vector<int>> nearests = sortedNeighboures(dists);
 
         double bestLen = std::numeric_limits<double>::max();
@@ -213,8 +214,11 @@ public:
             std::vector<int> route({start});
 
             for (int iter = 1; iter < kValue_; ++iter) {
-                while (usedInRoute[nearests[curr][nextCandidates[curr]]]) {
+                while (nextCandidates[curr] < coinsAmount && usedInRoute[nearests[curr][nextCandidates[curr]]]) {
                     ++nextCandidates[curr];
+                }
+                if (nextCandidates[curr] == coinsAmount) {
+                    break;
                 }
                 int newCurr = nearests[curr][nextCandidates[curr]];
                 len += dist(world.coins[curr].position_, world.coins[newCurr].position_);
@@ -227,6 +231,7 @@ public:
                 bestRoute = route;
             }
         }
+
 
         for (int pos : bestRoute) {
             result.emplace_back(new TakeCoinTask(world.coins[pos]));
@@ -247,13 +252,14 @@ class FirstMovementStrategyImpl : public MovementStrategy {
     Acceleration getAcceleration(const World &world,
                                  StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
         Point targerPoint = strategyTaskPtr->getTargetPoint(world, ball);
+        std::cerr << "Target: " << targerPoint.x_ << " " << targerPoint.y_ << std::endl;
         Velocity currentVelocity = ball.velocity_;
         Point currentPosition = ball.position_;
 
-        double accelerationX = targerPoint.x_ + currentVelocity.v_x_ - targerPoint.x_;
-        double accelerationY = targerPoint.y_ + currentVelocity.v_y_ - targerPoint.y_;
+        double accelerationX = targerPoint.x_ + currentVelocity.v_x_ - currentPosition.x_;
+        double accelerationY = targerPoint.y_ + currentVelocity.v_y_ - currentPosition.y_;
 
-        double length = getNorm(Point(accelerationX, accelerationY));
+        double length = getNorm(Point(accelerationX, accelerationY)) + 1e-4;
 
         return Acceleration(accelerationX / length, accelerationY / length);
     }
@@ -265,9 +271,8 @@ class SecondMovementStrategyImpl : public MovementStrategy {
         Point targerPoint = strategyTaskPtr->getTargetPoint(world, ball);
         Velocity currentVelocity = ball.velocity_;
         Point currentPosition = ball.position_;
-
+        std::cerr << "Target: " << targerPoint.x_ << " " << targerPoint.y_ << std::endl;
         double rotationAngle = getAngleToOX(currentPosition, targerPoint);
-
         Velocity rotatedVelocity = rotateAndMove(currentVelocity, currentPosition, rotationAngle);
 
         double accelerationY = std::min(1.0, rotatedVelocity.v_y_);
@@ -276,7 +281,7 @@ class SecondMovementStrategyImpl : public MovementStrategy {
         Velocity accelerationInOld = rotateAndMove(Velocity(accelerationX, accelerationY),
                                                    Point(-currentPosition.x_, -currentPosition.y_),
                                                    -rotationAngle);
-        double length = getNorm(Point(accelerationInOld.v_x_, accelerationInOld.v_y_));
+        double length = getNorm(Point(accelerationInOld.v_x_, accelerationInOld.v_y_)) + 1e-4;
         return Acceleration(accelerationInOld.v_x_ / length,
                             accelerationInOld.v_y_ / length);
     }
@@ -287,7 +292,7 @@ class RandomMovementStrategyImpl : public MovementStrategy {
                                  StrategyTaskPtr strategyTaskPtr, const Ball &ball) {
         double a_x = rand() - RAND_MAX / 2;
         double b_x = rand() - RAND_MAX / 2;
-        double length = a_x * a_x + b_x * b_x;
+        double length = a_x * a_x + b_x * b_x + 1e-4;
         return Acceleration(a_x / length, b_x / length);
     }
 };

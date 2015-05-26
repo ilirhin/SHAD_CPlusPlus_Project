@@ -26,8 +26,7 @@ double rotateCos(const Point &first, const Point &second, const Point &third) {
     double sx = third.x_ - second.x_;
     double fy = second.y_ - first.y_;
     double sy = third.y_ - second.y_;
-
-    return (fx * sx + fy * sy) / sqrt(fx * fx + fy * fy) / sqrt(sx * sx + sy * sy);
+    return (fx * sx + fy * sy) / sqrt(fx * fx + fy * fy + 1e-4) / sqrt(sx * sx + sy * sy + 1e-4);
 }
 
 double cosBetweenVectors(const Point &first, const Point &second) {
@@ -48,9 +47,9 @@ double getAngleToOX(const Point &current, const Point &target) {
     double y = target.y_ - oy;
 
     if ((ax * by - ay * bx) > 0) {
-        return std::acos(x / (x * x + y * y));
+        return std::acos(x / sqrt(x * x + y * y +1e-4));
     } else {
-        return std::acos(-1) - std::acos(x / (x * x + y * y));
+        return std::acos(-1) - std::acos(x / sqrt(x * x + y * y + 1e-4));
     }
 }
 

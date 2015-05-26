@@ -45,10 +45,10 @@ public:
 
         if (str == NEAREST_COIN_STR) {
             // globalStrategy_ = std::make_shared<GlobalStrategy>(new NearestCoinStrategy(1));
-            globalStrategy_.reset(new NearestCoinStrategy(1));
+            globalStrategy_.reset(new NearestCoinStrategy(10));
         } else if (str == K_NEAREST_COIN_STR) {
             // globalStrategy_ = std::make_shared<GlobalStrategy>(new KNearestCoinsStrategy(1, std::atoi(count.c_str())));
-            globalStrategy_.reset(new KNearestCoinsStrategy(1, std::atoi(count.c_str())));
+            globalStrategy_.reset(new KNearestCoinsStrategy(10, std::atoi(count.c_str())));
         } else {
             std::cerr << GetWrongParameterMessage(argv[0], GLOBAL_STR_PARAM_NAME);
             exit(0);
