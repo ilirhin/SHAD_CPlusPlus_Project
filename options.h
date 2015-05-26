@@ -33,7 +33,7 @@ public:
                 count = argv[cur_param + 1];
                 cur_param += 2;
             } else if (cur_param_name == STRATEGY_CONFIDENCE) {
-                condidence = argv[cur_param + 1];
+                confidence = argv[cur_param + 1];
                 cur_param += 2;
             } else if (cur_param_name == HELP_MESSAGE_NAME) {
                 std::cerr << GetHelpMessage(argv[0]) << "\n";

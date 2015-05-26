@@ -256,8 +256,8 @@ class FirstMovementStrategyImpl : public MovementStrategy {
         Velocity currentVelocity = ball.velocity_;
         Point currentPosition = ball.position_;
 
-        double accelerationX = targerPoint.x_ - currentPosition.x_ + currentVelocity.x_;
-        double accelerationY = targerPoint.y_ - currentPosition.y_ + currentVelocity.y_;
+        double accelerationX = targerPoint.x_ - currentPosition.x_;
+        double accelerationY = targerPoint.y_ - currentPosition.y_;
 
         double length = getNorm(Point(accelerationX, accelerationY)) + 1e-4;
 
@@ -279,7 +279,7 @@ class SecondMovementStrategyImpl : public MovementStrategy {
         double proection = scalarMult(Point(currentVelocity.v_x_, currentVelocity.v_y_), targetRelative);
 
         Point perpendicular(-targetRelative.y_, targetRelative.x_);
-        Point perpNorm(-targetRelative.y_ / getNorm(perpendicular) + 1e-4, targetRelative.x_ / getNorm(perpendicular) + 1e-4);
+        Point perpNorm(-targetRelative.y_ / (getNorm(perpendicular) + 1e-4), targetRelative.x_ / (getNorm(perpendicular) + 1e-4));
 
         double perpProection = scalarMult(Point(currentVelocity.v_x_, currentVelocity.v_y_), perpNorm);
 
