@@ -283,9 +283,16 @@ class SecondMovementStrategyImpl : public MovementStrategy {
 
         Point accByPerp(-perpProection * perpNorm.x_, -perpProection * perpNorm.y_);
 
+
+        double length = getNorm(accByPerp);
+        if (length > 1) {
+            accByPerp.x_ /= length;
+            accByPerp.y_ /= length;
+        }
+
         double restAcc = sqrt(1 - std::min(1.0, getNorm(accByPerp)));
 
-        Point accToTarget(restAcc * targetRelaviteNorm.x_, restAcc * targetRelaviteNorm.y_);
+        Point accToTarget(-restAcc * targetRelaviteNorm.x_, -restAcc * targetRelaviteNorm.y_);
 
         return Acceleration(accByPerp.x_ + accToTarget.x_, accByPerp.y_ + accToTarget.y_);
     }
