@@ -256,8 +256,8 @@ class FirstMovementStrategyImpl : public MovementStrategy {
         Velocity currentVelocity = ball.velocity_;
         Point currentPosition = ball.position_;
 
-        double accelerationX = targerPoint.x_ + currentVelocity.v_x_ - currentPosition.x_;
-        double accelerationY = targerPoint.y_ + currentVelocity.v_y_ - currentPosition.y_;
+        double accelerationX = targerPoint.x_ - currentPosition.x_;
+        double accelerationY = targerPoint.y_ - currentPosition.y_;
 
         double length = getNorm(Point(accelerationX, accelerationY)) + 1e-4;
 
