@@ -279,7 +279,7 @@ class SecondMovementStrategyImpl : public MovementStrategy {
         double proection = scalarMult(Point(currentVelocity.v_x_, currentVelocity.v_y_), targetRelative);
 
         Point perpendicular(-targetRelative.y_, targetRelative.x_);
-        Point perpNorm(-targetRelative.y_ / getNorm(perpendicular), targetRelative.x_ / getNorm(perpendicular));
+        Point perpNorm(-targetRelative.y_ / getNorm(perpendicular) + 1e-4, targetRelative.x_ / getNorm(perpendicular) + 1e-4);
 
         double perpProection = scalarMult(Point(currentVelocity.v_x_, currentVelocity.v_y_), perpNorm);
 
