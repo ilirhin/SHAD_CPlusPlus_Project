@@ -100,8 +100,10 @@ private:
         return message;
     }
 
+
     std::string GetWrongParameterMessage(const std::string& app_name, const std::string& par_name) {
         std::string message = app_name + ": unknown argument for " + par_name;
+	return message;
     }
 
     std::string GetUsageMessage(const std::string& app_name) {

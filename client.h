@@ -197,7 +197,7 @@ private:
         turn_answer = MessageToJson(&turn_message);
     }
 };
-
+/*
 class Viewer : public Client {
 private:
     Notifier* notifier_;
@@ -231,3 +231,4 @@ private:
         actionManager_.performViewerAction(world, notifier_, show_first_time);
     }
 };
+*/

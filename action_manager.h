@@ -19,7 +19,7 @@ public:
         return movementStrategyPtr->
                 getAcceleration(world, globalStrategyPtr->getTask(world, ball), ball);
     }
-
+/*
     void performViewerAction(const World &world, Notifier* notifier, bool& show_first_time) {
         //std::cout << "Viewer performs action" << std::endl;
         if (show_first_time) {
@@ -29,4 +29,5 @@ public:
             notifier->updateWorld(world);
         }
     }
+*/
 };
